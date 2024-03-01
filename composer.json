@@ -1,7 +1,6 @@
 {
-    "name": "codeigniterext/maintenancemode",
+    "name": "esoftdream/maintenance-mode",
     "description": "Maintenance Mode module for CodeIgniter 4",
-    "license": "MIT",
     "authors": [
         {
             "name": "Arash Saffari",
@@ -9,12 +8,11 @@
         }
     ],
     "require": {
-
+        "codeigniter4/framework": "^4"
     },
     "autoload": {
         "psr-4": {
             "CodeigniterExt\\MaintenanceMode\\": "src"
         }
     }
-
 }
