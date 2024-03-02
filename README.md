@@ -24,7 +24,7 @@ implement a maintenance mode check.
 ```
 ## Additional
 
-Open the file app/Config/Exception.php in your code editor.\
-Locate the line containing public array $ignoreCodes = [404];.\
-Add, 503 within the square brackets to ignore 503 status codes for logging.\
+Open the file _app/Config/Exception.php_ in your code editor.\
+Locate the line containing `public array $ignoreCodes = [404];`.\
+Add, **503** within the square brackets to ignore 503 status codes for logging.\
 Save your changes.
