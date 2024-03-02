@@ -1,20 +1,11 @@
 # Maintenance Mode for Codeigniter 4
 
-Maintenance mode module for CodeIgniter 4 with CLI
+Easily manage maintenance mode for your CodeIgniter 4 \
+application with this CLI-powered module.\
+View available commands for activating, deactivating, and \
+customizing maintenance mode.
 
-## Installing
-
-```shell
-composer require esoftdream/maintenancemode
-```
-
-## Configuration
-Run the following command from the command prompt, and it will copy views (error_503.php)  into your application
-```shell
-php spark mm:publish
-```
-
-## How to use (?)
+## Setup
 
 Open *app/Config/Events.php* and insert the provided code to\
 implement a maintenance mode check.
