@@ -1,6 +1,8 @@
 <?php
 
-namespace CodeigniterExt\MaintenanceMode\Libraries;
+namespace Esoftdream\MaintenanceMode\Libraries;
+
+use RuntimeException;
 
 class IpUtils
 {
@@ -17,13 +19,13 @@ class IpUtils
      * Checks if an IPv4 or IPv6 address is contained in the list of given IPs or subnets.
      *
      * @param string       $requestIp IP to check
-     * @param string|array $ips       List of IPs or subnets (can be a string if only a single one)
+     * @param array|string $ips       List of IPs or subnets (can be a string if only a single one)
      *
      * @return bool Whether the IP is valid
      */
     public static function checkIp($requestIp, $ips)
     {
-        if (!\is_array($ips)) {
+        if (! \is_array($ips)) {
             $ips = [$ips];
         }
 
@@ -49,17 +51,17 @@ class IpUtils
      */
     public static function checkIp4($requestIp, $ip)
     {
-        $cacheKey = $requestIp.'-'.$ip;
+        $cacheKey = $requestIp . '-' . $ip;
         if (isset(self::$checkedIps[$cacheKey])) {
             return self::$checkedIps[$cacheKey];
         }
 
-        if (!filter_var($requestIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        if (! filter_var($requestIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             return self::$checkedIps[$cacheKey] = false;
         }
 
         if (false !== strpos($ip, '/')) {
-            list($address, $netmask) = explode('/', $ip, 2);
+            [$address, $netmask] = explode('/', $ip, 2);
 
             if ('0' === $netmask) {
                 return self::$checkedIps[$cacheKey] = filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
@@ -84,8 +86,6 @@ class IpUtils
      * Compares two IPv6 addresses.
      * In case a subnet is given, it checks if it contains the request IP.
      *
-     * @author David Soria Parra <dsp at php dot net>
-     *
      * @see https://github.com/dsp/v6tools
      *
      * @param string $requestIp IPv6 address to check
@@ -93,21 +93,21 @@ class IpUtils
      *
      * @return bool Whether the IP is valid
      *
-     * @throws \RuntimeException When IPV6 support is not enabled
+     * @throws RuntimeException When IPV6 support is not enabled
      */
     public static function checkIp6($requestIp, $ip)
     {
-        $cacheKey = $requestIp.'-'.$ip;
+        $cacheKey = $requestIp . '-' . $ip;
         if (isset(self::$checkedIps[$cacheKey])) {
             return self::$checkedIps[$cacheKey];
         }
 
-        if (!((\extension_loaded('sockets') && \defined('AF_INET6')) || @inet_pton('::1'))) {
-            throw new \RuntimeException('Unable to check Ipv6. Check that PHP was not compiled with option "disable-ipv6".');
+        if (! ((\extension_loaded('sockets') && \defined('AF_INET6')) || @inet_pton('::1'))) {
+            throw new RuntimeException('Unable to check Ipv6. Check that PHP was not compiled with option "disable-ipv6".');
         }
 
         if (false !== strpos($ip, '/')) {
-            list($address, $netmask) = explode('/', $ip, 2);
+            [$address, $netmask] = explode('/', $ip, 2);
 
             if ('0' === $netmask) {
                 return (bool) unpack('n*', @inet_pton($address));
@@ -124,15 +124,15 @@ class IpUtils
         $bytesAddr = unpack('n*', @inet_pton($address));
         $bytesTest = unpack('n*', @inet_pton($requestIp));
 
-        if (!$bytesAddr || !$bytesTest) {
+        if (! $bytesAddr || ! $bytesTest) {
             return self::$checkedIps[$cacheKey] = false;
         }
 
-        for ($i = 1, $ceil = ceil($netmask / 16); $i <= $ceil; ++$i) {
+        for ($i = 1, $ceil = ceil($netmask / 16); $i <= $ceil; $i++) {
             $left = $netmask - 16 * ($i - 1);
             $left = ($left <= 16) ? $left : 16;
-            $mask = ~(0xffff >> $left) & 0xffff;
-            if (($bytesAddr[$i] & $mask) != ($bytesTest[$i] & $mask)) {
+            $mask = ~(0xFFFF >> $left) & 0xFFFF;
+            if (($bytesAddr[$i] & $mask) !== ($bytesTest[$i] & $mask)) {
                 return self::$checkedIps[$cacheKey] = false;
             }
         }

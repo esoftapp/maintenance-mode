@@ -1,142 +1,83 @@
-<?php namespace CodeigniterExt\MaintenanceMode\Commands;
+<?php
 
-use Config\Autoload;
-use CodeIgniter\CLI\CLI;
+namespace Esoftdream\MaintenanceMode\Commands;
+
 use CodeIgniter\CLI\BaseCommand;
+use CodeIgniter\Publisher\Publisher;
+use Throwable;
 
 class Publish extends BaseCommand
 {
-    
-    protected $group        = 'Maintenance Mode';
-    protected $name         = 'mm:publish';
-    protected $description  = 'Publish 503 Error code view into the current application folder.';
-    protected $usage        = 'mm:publish';
-    protected $arguments    = [];
-	protected $options 		= [];
-    protected $sourcePath;
-
-    //--------------------------------------------------------------------
+    /**
+     * The Command's Group
+     *
+     * @var string
+     */
+    protected $group = 'Maintenance';
 
     /**
-     * Displays the help for the spark cli script itself.
+     * The Command's Name
      *
-     * @param array $params
+     * @var string
+     */
+    protected $name = 'mm:publish';
+
+    /**
+     * The Command's Description
+     *
+     * @var string
+     */
+    protected $description = 'Publish 503 Error code view into the current application folder.';
+
+    /**
+     * The Command's Usage
+     *
+     * @var string
+     */
+    protected $usage = 'mm:publish';
+
+    /**
+     * The Command's Arguments
+     *
+     * @var array
+     */
+    protected $arguments = [];
+
+    /**
+     * The Command's Options
+     *
+     * @var array
+     */
+    protected $options = [];
+
+    /**
+     * Actually execute a command.
      */
     public function run(array $params)
     {
-        $this->determineSourcePath();
+        $publisher = new Publisher(VENDORPATH . 'esoftdream/maintenance-mode/src', APPPATH);
 
-        // Views
-        if (CLI::prompt('Publish Views?', ['y', 'n']) == 'y')
-        {
-            $map = false;
-            $map = directory_map($this->sourcePath . '/Views/errors/cli');
-            $this->publishViews($map, 'errors/cli/');
+        // $source    = service('autoloader')->getNamespace('CodeIgniter\\Shield')[0];
+        // $publisher = new Publisher($source, APPPATH);
 
-            $map = false;
-            $map = directory_map($this->sourcePath . '/Views/errors/html');
-            $this->publishViews($map, 'errors/html/');
+        try {
+            $publisher->addDirectory('Config');
+            $publisher->addDirectory('Views');
+
+            $publisher->copy();
         }
-
-        // Config
-        if (CLI::prompt('Publish Config file?', ['y', 'n']) == 'y')
-        {
-            $this->publishConfig();
-        }
-    }
-
-    protected function publishViews($map, $subfolder)
-    {
-        
-        $prefix = '';
-
-        foreach ($map as $key => $view)
-        {
-            if (is_array($view))
-            {
-                $oldPrefix = $prefix;
-                $prefix .= $key;
-
-                foreach ($view as $file)
-                {
-                    $this->publishView($file, $prefix, $subfolder);
-                }
-
-                $prefix = $oldPrefix;
-
-                continue;
-            }
-
-            $this->publishView($view, $prefix, $subfolder);
-        }
-    }
-
-    protected function publishView($view, string $prefix = '', string $subfolder = '')
-    {
-        $path = "{$this->sourcePath}/Views/{$subfolder}{$prefix}{$view}";
-		$namespace = defined('APP_NAMESPACE') ? APP_NAMESPACE : 'App';
-
-        $content = file_get_contents($path);
-
-        $this->writeFile("Views/{$subfolder}{$prefix}{$view}", $content);
-    }
-
-    protected function publishConfig()
-    {
-        $path = "{$this->sourcePath}/Config/MaintenanceMode.php";
-
-        $content = file_get_contents($path);
-        $appNamespace = APP_NAMESPACE;
-        $content = str_replace('namespace CodeigniterExt\MaintenanceMode\Config', "namespace {$appNamespace}\Config", $content);
-
-        $this->writeFile("Config/MaintenanceMode.php", $content);
-    }
-
-    /**
-     * Determines the current source path from which all other files are located.
-     */
-    protected function determineSourcePath()
-    {
-        $this->sourcePath = realpath(__DIR__ . '/../');
-
-        if ($this->sourcePath == '/' || empty($this->sourcePath))
-        {
-            CLI::error('Unable to determine the correct source directory. Bailing.');
-            exit();
-        }
-    }
-
-    /**
-     * Write a file, catching any exceptions and showing a
-     * nicely formatted error.
-     *
-     * @param string $path
-     * @param string $content
-     */
-    protected function writeFile(string $path, string $content)
-    {
-        $config = new Autoload();
-        $appPath = $config->psr4[APP_NAMESPACE];
-
-        $directory = dirname($appPath . $path);
-
-        if (! is_dir($directory))
-        {
-            mkdir($directory);
-        }
-
-        try
-        {
-            write_file($appPath . $path, $content);
-        }
-        catch (\Exception $e)
-        {
+        catch (Throwable $e) {
             $this->showError($e);
-            exit();
+
+            return;
         }
 
-        $path = str_replace($appPath, '', $path);
-
-        CLI::write(CLI::color('  created: ', 'green') . $path);
+        // If publication succeeded then update namespaces
+        foreach ($publisher->getPublished() as $file) {
+            // Replace the namespace
+            $contents = file_get_contents($file);
+            $contents = str_replace('namespace Esoftdream\\MaintenanceMode', 'namespace ' . APP_NAMESPACE . '\\Config', $contents);
+            file_put_contents($file, $contents);
+        }
     }
 }

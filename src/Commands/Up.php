@@ -1,28 +1,65 @@
-<?php namespace CodeigniterExt\MaintenanceMode\Commands;
+<?php
+
+namespace Esoftdream\MaintenanceMode\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 
 class Up extends BaseCommand
 {
-	protected $group        = 'Maintenance Mode';
-	protected $name         = 'mm:up';
-	protected $description  = 'Bring the application out of maintenance mode';
-	protected $usage        = 'mm:up';
-	protected $arguments    = [];
-	protected $options 		= [];
+    /**
+     * The Command's Group
+     *
+     * @var string
+     */
+    protected $group = 'Maintenance';
 
-	public function run(array $params)
-	{
-		$config = \CodeigniterExt\MaintenanceMode\Controllers\MaintenanceMode::getConfig();
+    /**
+     * The Command's Name
+     *
+     * @var string
+     */
+    protected $name = 'mm:up';
 
-		//
-		//delete the file with json content
-		//
-		@unlink($config->FilePath . $config->FileName);
+    /**
+     * The Command's Description
+     *
+     * @var string
+     */
+    protected $description = 'Take the application out of maintenance mode.';
 
-		CLI::write('');
-		CLI::write('**** Application is now live. ****', 'black', 'green');
-		CLI::write('');
-	}
+    /**
+     * The Command's Usage
+     *
+     * @var string
+     */
+    protected $usage = 'mm:up';
+
+    /**
+     * The Command's Arguments
+     *
+     * @var array
+     */
+    protected $arguments = [];
+
+    /**
+     * The Command's Options
+     *
+     * @var array
+     */
+    protected $options = [];
+
+    /**
+     * Actually execute a command.
+     */
+    public function run(array $params)
+    {
+        $config = config('Maintenance');
+
+        @unlink($config->filePath . $config->fileName);
+
+        CLI::write('');
+        CLI::write(':: Application is now live ::', 'black', 'green');
+        CLI::write('');
+    }
 }

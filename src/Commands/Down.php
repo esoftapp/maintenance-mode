@@ -1,71 +1,92 @@
-<?php namespace CodeigniterExt\MaintenanceMode\Commands;
+<?php
+
+namespace Esoftdream\MaintenanceMode\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 
 class Down extends BaseCommand
 {
-	protected $group        = 'Maintenance Mode';
-	protected $name         = 'mm:down';
-	protected $description  = 'Put the application into maintenance mode';
-	protected $usage        = 'mm:down';
-	protected $arguments    = [];
-	protected $options 		= [];
+    /**
+     * The Command's Group
+     *
+     * @var string
+     */
+    protected $group = 'Maintenance';
 
-	public function run(array $params)
-	{
-		$config = \CodeigniterExt\MaintenanceMode\Controllers\MaintenanceMode::getConfig();
+    /**
+     * The Command's Name
+     *
+     * @var string
+     */
+    protected $name = 'mm:down';
 
-		if (! file_exists($config->FilePath . $config->FileName)) {
-			
-			$message = CLI::prompt("Message");
-			$ips_str = CLI::prompt("Allowed ips [example: 0.0.0.0 127.0.0.1]");
+    /**
+     * The Command's Description
+     *
+     * @var string
+     */
+    protected $description = 'Put the application into maintenance mode.';
 
-			$ips_array = explode(" ", $ips_str);
+    /**
+     * The Command's Usage
+     *
+     * @var string
+     */
+    protected $usage = 'mm:down';
 
-			//
-			// dir doesn't exist, make it
-			//
-			if (!is_dir($config->FilePath)) {
-				mkdir($config->FilePath);
-			}
+    /**
+     * The Command's Arguments
+     *
+     * @var array
+     */
+    protected $arguments = [];
 
-			//
-			// write the file with json content
-			//
-			file_put_contents(
-				$config->FilePath . $config->FileName,
-				json_encode([
-					"time"			=> strtotime("now"),
-					"message" 		=> $message,
-					"cookie_name"	=> $this->randomhash(8),
-					"allowed_ips"	=> $ips_array
-				], JSON_PRETTY_PRINT)
-			);
+    /**
+     * The Command's Options
+     *
+     * @var array
+     */
+    protected $options = [];
 
-			CLI::newLine(1);
-			CLI::write('**** Application is now DOWN. ****', 'white', 'red');
-			CLI::newLine(1);
+    /**
+     * Actually execute a command.
+     */
+    public function run(array $params)
+    {
+        $config = config('Maintenance');
 
-			$this->call('mm:status');
+        // check maintenance file
+        if (! is_file($config->filePath . $config->fileName)) {
+            helper('text');
 
-		}else{
-			CLI::newLine(1);
-			CLI::error('**** Application is already DOWN. ****');
-			CLI::newLine(1);
-		}
-	}
+            $message = CLI::prompt('Message');
+            $ips_str = CLI::prompt("Allowed IP's. example: 0.0.0.0 127.0.0.1");
 
-	function randomhash($len = 8){
-		$seed = str_split('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
-		shuffle($seed);
-		$rand = '';
-		
-		foreach (array_rand($seed, $len) as $k)
-		{
-			$rand .= $seed[$k];
-		}
-		
-		return $rand;
-	  }
+            $ips_array = explode(' ', $ips_str);
+
+            //
+            // write the file with json content
+            //
+            file_put_contents(
+                $config->filePath . $config->fileName,
+                json_encode([
+                    'time'        => strtotime('now'),
+                    'message'     => $message,
+                    'cookie_name' => random_string('alnum', 8),
+                    'allowed_ips' => $ips_array,
+                ], JSON_PRETTY_PRINT)
+            );
+
+            CLI::newLine(1);
+            CLI::write(':: Application is now DOWN ::', 'white', 'red');
+            CLI::newLine(1);
+
+            $this->call('mm:status');
+        } else {
+            CLI::newLine(1);
+            CLI::write(':: Application is already DOWN ::', 'white', 'red');
+            CLI::newLine(1);
+        }
+    }
 }
