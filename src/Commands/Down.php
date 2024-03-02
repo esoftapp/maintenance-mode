@@ -61,7 +61,7 @@ class Down extends BaseCommand
             helper('text');
 
             $message = CLI::prompt('Message');
-            $ips_str = CLI::prompt("Allowed IP's. example: 0.0.0.0 127.0.0.1");
+            $ips_str = CLI::prompt("Allowed IP's. [example: 0:0:0:0 127:0:0:1]");
 
             $ips_array = explode(' ', $ips_str);
 
