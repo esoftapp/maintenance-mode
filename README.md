@@ -7,6 +7,7 @@ Maintenance mode module for CodeIgniter 4 with CLI
 ```shell
 composer require esoftdream/maintenancemode
 ```
+
 ## Configuration
 Run the following command from the command prompt, and it will copy views (error_503.php)  into your application
 ```shell
@@ -15,14 +16,15 @@ php spark mm:publish
 
 ## How to use (?)
 
-edit *app/Config/Events.php* and\
-add this code for maintenance mode check:
+Open *app/Config/Events.php* and insert the provided code to\
+implement a maintenance mode check.
 
 ```php
 \Esoftdream\MaintenanceMode\Maintenance::check();
 ```
 ## Additional
 
-edit *app/Config/Exception.php*\
-find **public array $ignoreCodes = [404];**\
-then add **503** for ignore the ignore the log.
+Open the file app/Config/Exception.php in your code editor.\
+Locate the line containing public array $ignoreCodes = [404];.\
+Add, 503 within the square brackets to ignore 503 status codes for logging.\
+Save your changes.
