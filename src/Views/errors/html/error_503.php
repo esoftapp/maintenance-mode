@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?= lang('Errors.pageNotFound') ?></title>
+    <title>503 - Service Unavailable</title>
 
     <style>
         div.logo {
@@ -70,7 +70,7 @@
 </head>
 <body>
     <div class="wrap">
-        <h1>404</h1>
+        <h1>503 - Service Unavailable</h1>
 
         <p>
             <?php if (ENVIRONMENT !== 'production') : ?>
