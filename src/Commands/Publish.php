@@ -55,28 +55,30 @@ class Publish extends BaseCommand
      */
     public function run(array $params)
     {
-        $publisher = new Publisher(VENDORPATH . 'esoftdream/maintenance-mode/src', APPPATH);
+        $config = new Publisher(VENDORPATH . 'esoftdream/maintenance-mode/src/Config', APPPATH . 'Config');
+        $view   = new Publisher(VENDORPATH . 'esoftdream/maintenance-mode/src/Views', APPPATH . 'Views/errors/html');
 
         // $source    = service('autoloader')->getNamespace('CodeIgniter\\Shield')[0];
         // $publisher = new Publisher($source, APPPATH);
 
         try {
-            $publisher->addDirectory('Config');
-            $publisher->addDirectory('Views');
-
-            $publisher->copy();
-        }
-        catch (Throwable $e) {
+            $config->addPaths([
+                'Maintenance.php',
+            ]);
+            $config->copy();
+            $view->addPath('errors/html');
+            $view->copy();
+        } catch (Throwable $e) {
             $this->showError($e);
 
             return;
         }
 
         // If publication succeeded then update namespaces
-        foreach ($publisher->getPublished() as $file) {
+        foreach ($config->getPublished() as $file) {
             // Replace the namespace
             $contents = file_get_contents($file);
-            $contents = str_replace('namespace Esoftdream\\MaintenanceMode', 'namespace ' . APP_NAMESPACE . '\\Config', $contents);
+            $contents = str_replace('namespace Esoftdream\\MaintenanceMode', 'namespace ' . APP_NAMESPACE, $contents);
             file_put_contents($file, $contents);
         }
     }
