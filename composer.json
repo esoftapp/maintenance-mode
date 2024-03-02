@@ -1,18 +1,12 @@
 {
     "name": "esoftdream/maintenance-mode",
     "description": "Maintenance Mode module for CodeIgniter 4",
-    "authors": [
-        {
-            "name": "Arash Saffari",
-            "email": "arash@saffari.com"
-        }
-    ],
     "require": {
-        "codeigniter4/framework": "^4"
+        "codeigniter4/framework": "^4.3"
     },
     "autoload": {
         "psr-4": {
-            "CodeigniterExt\\MaintenanceMode\\": "src"
+            "Esoftdream\\MaintenanceMode\\": "src"
         }
     }
 }
